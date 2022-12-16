@@ -7,10 +7,24 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.shnayder.android.photogallery.api.FlickrApi
+import retrofit2.Retrofit
 
 
 class PhotoGalleryFragment : Fragment() {
     private lateinit var photoRecyclerView: RecyclerView
+
+    //Использование объекта Retrofit для создания экземпляра API (реализации интерфейса FlickrApi)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //настройка и сборка экземпляра Retrofit
+        //build() - возвращает экземпляр Retrofit
+        val retrofit: Retrofit = Retrofit.Builder().baseUrl("https://www.flickr.com/").build()
+
+        //создание экземпляра интерфейса API
+        val flickrApi: FlickrApi = retrofit.create(FlickrApi::class.java)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
