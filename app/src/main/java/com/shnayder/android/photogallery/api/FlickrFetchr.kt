@@ -1,9 +1,13 @@
 package com.shnayder.android.photogallery.api
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.shnayder.android.photogallery.GalleryItem
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -13,6 +17,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 private const val TAG = "FlickrFetchr"
 
+
+//FlickrFetchr разбирает данные JSON в списке GalleryItem и публикует список  возвращаемому объекту LiveData
 
 //Класс репозитория инкапсулирует логику доступа к данным из одного источника или набора источников.
 //Он определяет, как получать и хранить определенный набор данных
@@ -68,5 +74,17 @@ class FlickrFetchr {
     }
 
 
+    //загружать данные по заданномуURL-адресу и декодировать их в изображение Bitmap
+    //Аннотация @WorkerThread указывает, что эта функция должна вызываться только в фоновом потоке
+    @WorkerThread
+    fun fetchPhoto(url: String): Bitmap? {
+        //execute() синхронно выполняет веб-запрос
+        val response: Response<ResponseBody> = flickrApi.fetchUrlBytes(url).execute()
+        //создание Bitmap из данных в потоке
+        val bitmap = response.body()?.byteStream()?.use(BitmapFactory::decodeStream)
+        Log.i(TAG, "Decoded bitmap=$bitmap from Response=$response")
+        //возвращаем растровое изображение
+        return bitmap
+    }
 
 }

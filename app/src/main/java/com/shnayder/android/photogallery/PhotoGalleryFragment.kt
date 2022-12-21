@@ -30,13 +30,21 @@ private const val TAG = "PhotoGalleryFragment"
 class PhotoGalleryFragment : Fragment() {
     private lateinit var photoGalleryViewModel: PhotoGalleryViewModel
     private lateinit var photoRecyclerView: RecyclerView
+    //создание экземпляра фонового потока
+    private lateinit var thumbnailDownloader: ThumbnailDownloader<PhotoHolder>
 
     //Использование объекта Retrofit для создания экземпляра API (реализации интерфейса FlickrApi)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //сохранение фрагмента
+        retainInstance = true
+
         photoGalleryViewModel = ViewModelProviders.of(this).get(PhotoGalleryViewModel::class.java)
 
+        //класс thumbnailDownloader получает вызовов о создании жизненного цикла PhotoGalleryFragment
+        thumbnailDownloader = ThumbnailDownloader()
+        lifecycle.addObserver(thumbnailDownloader)
     }
 
     override fun onCreateView(
@@ -61,7 +69,13 @@ class PhotoGalleryFragment : Fragment() {
             })
     }
 
-
+    //класс thumbnailDownloader получает вызовов об уничтожении жизненного цикла PhotoGalleryFragment
+    override fun onDestroy() {
+        super.onDestroy()
+        lifecycle.removeObserver(
+            thumbnailDownloader
+        )
+    }
 
 //    вывод заголовка изображения
 //    private class PhotoHolder(itemTextView: TextView) : RecyclerView.ViewHolder(itemTextView)
