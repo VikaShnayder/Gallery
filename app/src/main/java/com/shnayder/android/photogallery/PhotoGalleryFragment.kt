@@ -1,8 +1,10 @@
 package com.shnayder.android.photogallery
 
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -43,7 +45,12 @@ class PhotoGalleryFragment : Fragment() {
         photoGalleryViewModel = ViewModelProviders.of(this).get(PhotoGalleryViewModel::class.java)
 
         //класс thumbnailDownloader получает вызовов о создании жизненного цикла PhotoGalleryFragment
-        thumbnailDownloader = ThumbnailDownloader()
+        val responseHandler = Handler()
+        thumbnailDownloader = ThumbnailDownloader(responseHandler) { photoHolder, bitmap ->
+                val drawable = BitmapDrawable(resources, bitmap)
+                photoHolder.bindDrawable(drawable)
+            }
+
         lifecycle.addObserver(thumbnailDownloader)
     }
 
@@ -112,7 +119,9 @@ class PhotoGalleryFragment : Fragment() {
             ) as ImageView
             return PhotoHolder(view)
         }
+
         override fun getItemCount(): Int = galleryItems.size
+
         override fun onBindViewHolder(holder: PhotoHolder, position: Int) {
             val galleryItem = galleryItems[position]
             val placeholder: Drawable = ContextCompat.getDrawable(
@@ -122,6 +131,8 @@ class PhotoGalleryFragment : Fragment() {
                 ) ?: ColorDrawable()
             holder.bindDrawable(placeholder)
 
+            //вызов функции потока, передаем папку PhotoHolder где разместим фотографии и URL-адрес GalleryItem для скачивания
+            thumbnailDownloader.queueThumbnail(holder, galleryItem.url)
         }
     }
 
