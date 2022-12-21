@@ -7,6 +7,7 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.shnayder.android.photogallery.GalleryItem
+import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -28,23 +29,29 @@ class FlickrFetchr {
     private val flickrApi: FlickrApi
 
     init {
+        //Добавление перехватчика PhotoInterceptor() в конфигурацию Retrofit
+        val client = OkHttpClient.Builder()
+            .addInterceptor(PhotoInterceptor())
+            .build()
+
         //настройка и сборка экземпляра Retrofit
         val retrofit: Retrofit =Retrofit.Builder()
             .baseUrl("https://api.flickr.com/")
             //конвертер, который заставляет Retrofit десериализовать ответ в строки
             .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
             //build() - возвращает экземпляр Retrofit
             .build()
         flickrApi = retrofit.create(FlickrApi::class.java)
     }
 
+    fun searchPhotos(query: String): LiveData<List<GalleryItem>> {
+        return fetchPhotoMetadata(flickrApi.searchPhotos(query))
+    }
 
     //ставит в очередь сетевой запрос и обертывает результат в LiveData
-    fun fetchPhotos(): LiveData<List<GalleryItem>> {
+    private fun fetchPhotoMetadata(flickrRequest: Call<FlickrResponse>) : LiveData<List<GalleryItem>> {
         val responseLiveData: MutableLiveData<List<GalleryItem>> = MutableLiveData()
-
-        // генерации объекта retrofit2.Call, представляющего собой исполняемый веб-запрос.
-        val flickrRequest: Call<FlickrResponse> = flickrApi.fetchPhotos()
 
         //выполнение веб-запроса
         //enqueue(...) выполняет веб-запрос, находящийся в объекте Call в фоновом потоке

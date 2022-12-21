@@ -9,8 +9,8 @@ class PhotoGalleryViewModel : ViewModel() {
     //свойство для хранения объекта «живых» данных, содержащего список элементов галереи
     val galleryItemLiveData: LiveData<List<GalleryItem>>
     init {
-        //вызов функции fetchPhotos для запроса «получить недавние интересные фотографии»
+        //вызов функции searchPhotos(" ") для поиска фото на сайте
         //сохраним результат веб-запроса для получения данных фото при первой инициализации ViewModel (запуск приложения)
-        galleryItemLiveData = FlickrFetchr().fetchPhotos()
+        galleryItemLiveData = FlickrFetchr().searchPhotos("planets")
     }
 }
