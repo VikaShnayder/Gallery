@@ -10,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.shnayder.android.photogallery.api.FlickrFetchr
+import kotlinx.coroutines.NonCancellable.start
 import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "ThumbnailDownloader"
@@ -26,6 +27,35 @@ class ThumbnailDownloader<in T>
     (private val responseHandler: Handler,
      private val onThumbnailDownloaded: (T, Bitmap) -> Unit)
     : HandlerThread(TAG), LifecycleObserver {
+
+
+    val fragmentLifecycleObserver: LifecycleObserver = object : LifecycleObserver {
+        //аннотация @OnLifecycleEvent(Lifecycle.Event), позволяет ассоциировать функцию в вашем классе с обратным вызовом жизненного цикла
+        //запуск фонового потока при вызове функции onCreate() владельца жизненного цикла
+        @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        fun setup() {
+            Log.i(TAG, "Starting background thread")
+            start()
+            //очередь сообщений
+            looper
+        }
+        //остановка фонового потока при вызове функции onDestroy() владельца жизненного цикла
+        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        fun tearDown() {
+            Log.i(TAG, "Destroying background thread")
+            quit()
+        }
+    }
+
+    val viewLifecycleObserver: LifecycleObserver = object : LifecycleObserver {
+        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        fun clearQueue() {
+            Log.i(TAG, "Clearing all requests from queue")
+            requestHandler.removeMessages(MESSAGE_DOWNLOAD)
+            requestMap.clear()
+        }
+    }
+
 
 
     private var hasQuit = false
@@ -62,22 +92,7 @@ class ThumbnailDownloader<in T>
         return super.quit()
     }
 
-    //аннотация @OnLifecycleEvent(Lifecycle.Event), позволяет ассоциировать функцию в вашем классе с обратным вызовом жизненного цикла
-    //запуск фонового потока при вызове функции onCreate() владельца жизненного цикла
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    fun setup() {
-        Log.i(TAG, "Starting background thread")
-        start()
-        //очередь сообщений
-        looper
-    }
 
-    //остановка фонового потока при вызове функции onDestroy() владельца жизненного цикла
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    fun tearDown() {
-        Log.i(TAG, "Destroying background thread")
-        quit()
-    }
 
     //Т - идентификатор загругки
     //String - url адрес загрузки.
