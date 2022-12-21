@@ -6,9 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.shnayder.android.photogallery.api.FlickrApi
+import com.shnayder.android.photogallery.api.FlickrFetchr
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -25,31 +28,12 @@ class PhotoGalleryFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //настройка и сборка экземпляра Retrofit
-        val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("https://www.flickr.com/")
-            //конвертер, который заставляет Retrofit десериализовать ответ в строки
-            .addConverterFactory(ScalarsConverterFactory.create())
-            //build() - возвращает экземпляр Retrofit
-            .build()
-
-        //создание экземпляра интерфейса API
-        val flickrApi: FlickrApi = retrofit.create(FlickrApi::class.java)
-        // генерации объекта retrofit2.Call, представляющего собой исполняемый веб-запрос.
-        val flickrHomePageRequest: Call<String> = flickrApi.fetchContents()
-
-        //выполнение веб-запроса
-        //enqueue(...) выполняет веб-запрос, находящийся в объекте Call в фоновом потоке
-        flickrHomePageRequest.enqueue(object : Callback<String> {
-            //вызывается если ответа от сервера нет
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                Log.e(TAG, "Failed to fetchphotos" , t)
-            }
-            //вызывается если ответ от сервера получен
-            override fun onResponse(call: Call<String>, response: Response<String>) {
-                Log.d(TAG, "Response received:${response.body()}")
-            }
-        })
+        val flickrLiveData: LiveData<String> = FlickrFetchr().fetchContents()
+        flickrLiveData.observe(
+            this,
+            Observer{ responseString ->
+                Log.d(TAG, "Response received: $responseString")
+            })
     }
 
     override fun onCreateView(
