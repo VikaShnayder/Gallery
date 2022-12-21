@@ -8,7 +8,7 @@ interface FlickrApi {
     //GET-запрос, отправляется на главную страницу, настраивает Call, возвращаемый функцией fetchContents(), на выполнение GET-запроса
     @GET("/")
     //выполнении вызова генерируется один соответствующий веб-отклик
-    //ответ будет получен в виде строки
+    //ответ будет получен в виде FlickrResponse
     fun fetchContents(): Call<String>
 
     @GET(
@@ -20,5 +20,6 @@ interface FlickrApi {
         //добавить URL-адрес мини-версии изображения, если таковая есть
         "&extras=url_s"
     )
-    fun fetchPhotos(): Call<String>
+    //Gson будет использовать FlickrResponse для десериализации JSON-данных в ответе
+    fun fetchPhotos(): Call<FlickrResponse>
 }
