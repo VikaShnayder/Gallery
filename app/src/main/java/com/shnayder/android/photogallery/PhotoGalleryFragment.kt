@@ -72,7 +72,7 @@ class PhotoGalleryFragment : Fragment() {
         override fun getItemCount(): Int = galleryItems.size
         override fun onBindViewHolder(holder: PhotoHolder, position: Int) {
             val galleryItem = galleryItems[position]
-            holder.bindTitle(galleryItem.title)
+            holder.bindTitle(galleryItem.id)
         }
     }
 
