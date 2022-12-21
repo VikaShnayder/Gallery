@@ -22,7 +22,7 @@ class FlickrFetchr {
     init {
         //настройка и сборка экземпляра Retrofit
         val retrofit: Retrofit =Retrofit.Builder()
-            .baseUrl("https://www.flickr.com/")
+            .baseUrl("https://api.flickr.com/")
             //конвертер, который заставляет Retrofit десериализовать ответ в строки
             .addConverterFactory(ScalarsConverterFactory.create())
             //build() - возвращает экземпляр Retrofit
@@ -32,11 +32,11 @@ class FlickrFetchr {
 
 
     //ставит в очередь сетевой запрос и обертывает результат в LiveData
-    fun fetchContents(): LiveData<String> {
+    fun fetchPhotos(): LiveData<String> {
         val responseLiveData: MutableLiveData<String> = MutableLiveData()
 
         // генерации объекта retrofit2.Call, представляющего собой исполняемый веб-запрос.
-        val flickrRequest: Call<String> = flickrApi.fetchContents()
+        val flickrRequest: Call<String> = flickrApi.fetchPhotos()
 
         //выполнение веб-запроса
         //enqueue(...) выполняет веб-запрос, находящийся в объекте Call в фоновом потоке

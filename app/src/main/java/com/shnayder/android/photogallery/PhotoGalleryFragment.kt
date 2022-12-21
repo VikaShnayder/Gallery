@@ -28,7 +28,8 @@ class PhotoGalleryFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val flickrLiveData: LiveData<String> = FlickrFetchr().fetchContents()
+        //вызов функции fetchPhotos для запроса «получить недавние интересные фотографии»
+        val flickrLiveData: LiveData<String> = FlickrFetchr().fetchPhotos()
         flickrLiveData.observe(
             this,
             Observer{ responseString ->
