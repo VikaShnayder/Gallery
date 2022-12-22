@@ -120,8 +120,25 @@ class PhotoGalleryFragment : Fragment() {
                     return false
                 }
             })
+
+            //Предварительное заполнение SearchView
+            setOnSearchClickListener {
+                searchView.setQuery(photoGalleryViewModel.searchTerm, false)
+            }
         }
     }
+
+    // Очистка сохраненного запроса (когда пользователь выберет элемент «Clear Search» в меню)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_item_clear -> {
+                photoGalleryViewModel.fetchPhotos("")
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 
 //    вывод заголовка изображения
 //    private class PhotoHolder(itemTextView: TextView) : RecyclerView.ViewHolder(itemTextView)
