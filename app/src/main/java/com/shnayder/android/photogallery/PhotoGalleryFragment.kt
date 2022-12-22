@@ -1,5 +1,6 @@
 package com.shnayder.android.photogallery
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
@@ -7,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.*
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
@@ -50,7 +52,7 @@ class PhotoGalleryFragment : Fragment() {
         val responseHandler = Handler()
         thumbnailDownloader = ThumbnailDownloader(responseHandler) {
                 photoHolder, bitmap -> val drawable = BitmapDrawable(resources, bitmap)
-                photoHolder.bindDrawable(drawable)
+                photoHolder.img.setImageDrawable(drawable)
         }
 
         lifecycle.addObserver(thumbnailDownloader.fragmentLifecycleObserver)
@@ -161,9 +163,25 @@ class PhotoGalleryFragment : Fragment() {
 
 
 
-    private class PhotoHolder(private val itemImageView: ImageView) : RecyclerView.ViewHolder(itemImageView) {
-        val bindDrawable: (Drawable) -> Unit = itemImageView::setImageDrawable
+
+//
+//    private class PhotoHolder(private val photoItemView: View) : RecyclerView.ViewHolder(photoItemView) {
+//        //val bindDrawable: (Drawable) -> Unit = photoItemView::setImageDrawable
+//
+//        val img: ImageView =photoItemView.findViewById(R.id.photo_image)
+//        val ispublic: CheckBox= photoItemView.findViewById(R.id.checkbox)
+//
+//    }
+    private class PhotoHolder(photoItemView: View) : RecyclerView.ViewHolder(photoItemView) {
+        val img: ImageView
+        val ispublic: CheckBox
+
+        init {
+            img = photoItemView.findViewById(R.id.photo_image)
+            ispublic = photoItemView.findViewById(R.id.checkbox)
+        }
     }
+
 
     //RecyclerView.Adapter выдает PhotoHolder из галереи
     private inner class PhotoAdapter(private val galleryItems: List<GalleryItem>) : RecyclerView.Adapter<PhotoHolder>() {
@@ -172,7 +190,7 @@ class PhotoGalleryFragment : Fragment() {
                 R.layout.list_item_gallery,
                 parent,
                 false
-            ) as ImageView
+            ) //as ImageView
             return PhotoHolder(view)
         }
 
@@ -185,12 +203,23 @@ class PhotoGalleryFragment : Fragment() {
                 //временное изображение до завершения загрузки
                     R.drawable.bill_up_close
                 ) ?: ColorDrawable()
-            holder.bindDrawable(placeholder)
+            //holder.bindDrawable(placeholder)
+
+            var fds = galleryItem.ispublic
+            Log.d(TAG, "QueryTextSubmit: $fds")
+            var qwe = !galleryItem.ispublic.toBoolean()
+            Log.d(TAG, "QueryTextSubmit: $qwe")
+
+            holder.img.setImageDrawable(placeholder)
+            holder.ispublic.isChecked = !galleryItem.ispublic.toBoolean()
 
             //вызов функции потока, передаем папку PhotoHolder где разместим фотографии и URL-адрес GalleryItem для скачивания
             thumbnailDownloader.queueThumbnail(holder, galleryItem.url)
         }
     }
+
+
+
 
 
     companion object {

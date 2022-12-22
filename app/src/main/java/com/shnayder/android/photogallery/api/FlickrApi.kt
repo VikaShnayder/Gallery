@@ -23,6 +23,7 @@ interface FlickrApi {
 //        //добавить URL-адрес мини-версии изображения, если таковая есть
 //        "&extras=url_s"
 //    )
+
     @GET("services/rest?method=flickr.interestingness.getList")
     //Gson будет использовать FlickrResponse для десериализации JSON-данных в ответе
     fun fetchPhotos(): Call<FlickrResponse>
